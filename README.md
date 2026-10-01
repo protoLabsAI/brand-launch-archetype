@@ -129,8 +129,12 @@ Then enable the suggested list (`campaign, social, agent_browser, artifact, note
 
 1. **Media setup** (planning and copy work without it, and the media tools say exactly what's
    missing):
-   - Campaign Studio's banner: **Install dependencies** (the `playwright` package), then
-     **Install Chromium** (~150 MB, only from that button).
+   - **Desktop app members:** first provision the **Python runtime** (Settings ▸ Tools).
+     Campaign Studio ≥ 0.2 runs Playwright out of process, in that runtime, because a desktop
+     app can't install playwright into itself. The banner says so.
+   - Campaign Studio's banner: **Install dependencies** (the `playwright` package; it goes into
+     the managed runtime on desktop and into the agent's venv on a source install), then
+     **Install Chromium** (~150 MB, only from that button). Use **Check again** after a fix.
    - **ffmpeg** on PATH: `brew install ffmpeg`, `sudo apt install ffmpeg`, or
      `winget install Gyan.FFmpeg`. Or set Settings ▸ Plugins ▸ Campaign Studio ▸ *ffmpeg path*.
    - agent_browser's banner: **Download agent-browser**, then **Install Chrome**.
