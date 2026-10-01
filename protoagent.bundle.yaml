@@ -1,0 +1,97 @@
+# A protoAgent plugin BUNDLE (ADR 0040) — the Brand & Launch archetype: a launch manager
+# and brand lead for ANY app. From a brief it writes a campaign plan, produces the assets
+# (scripted screen recordings, GIFs, stills, social-preview cards, copy drafts) and tracks
+# each one to the operator's approval. This is the dedicated bundle repo protoAgent's
+# archetype-catalog.json `brand-launch` row installs (HELD from the picker until the
+# operator lists it); the persona ships as protoAgent's `brand-launch` soul preset.
+#
+# Install (onto any host):  python -m server plugin install <this-repo-url>
+# — or create a fleet member from it (README "Create an agent").
+#
+# DRAFT-ONLY. No member holds platform credentials or posts anywhere. The agent takes an
+# asset to `ready_for_review`; only the operator approves (Campaign Studio's gallery has
+# the buttons, and there is no agent tool for it). A person publishes.
+#
+# CORE FLOOR — protoAgent >= 0.188.0 (bundles carry no min-version, so it is stated here
+# and in the README, not enforced by the bundle):
+#   * campaign-plugin declares `min_protoagent_version: 0.188.0`, and the loader REFUSES
+#     it on an older core, so the planning and production half would be missing;
+#   * `agent_browser` is a core builtin from 0.165.0 (#3451);
+#   * the `brand-launch` soul preset ships with the protoAgent PR that added this
+#     archetype's catalog row. On a core without it, a picker/`soul_preset` create falls
+#     back to the base persona. Pass the persona inline as `soul` instead (README).
+#
+# FIRST-RUN SETUP — one optional answer (core >= 0.144.0 renders `config_inputs:`): the URL
+# of the app being launched. It becomes the Browser panel's homepage. Everything else (the
+# brief, the brand kit, the channels) comes from the interview in chat.
+#
+# BEFORE YOU START (media only; planning and copy work without any of it):
+#   * Campaign Studio's setup banner: "Install dependencies" (the `playwright` package)
+#     and "Install Chromium" (~150 MB, only ever from that button);
+#   * ffmpeg on PATH (`brew install ffmpeg` / `apt install ffmpeg` / `winget install
+#     Gyan.FFmpeg`) or Settings ▸ Plugins ▸ Campaign Studio ▸ ffmpeg path;
+#   * agent_browser's banner: "Download agent-browser" and "Install Chrome" (for exploring
+#     the target app before scripting it).
+#
+# MODEL — deliberately unset: the agent uses the host's model connection.
+#
+# PIN LIFECYCLE (ADR 0049): external members are pinned to release TAGS; on core >= 0.146
+# a pin is a FLOOR (installs take the newest COMPATIBLE tag, caret semantics, so for 0.x
+# the minor is the boundary: campaign v0.1.0 takes v0.1.1 when it ships, without a bump).
+# Bump only to adopt an out-of-range release. The verify workflow proves each pin set.
+# Keep member entries on ONE line: scripts/check_bundle_updates.py rewrites `ref:` in place.
+
+id: brand-launch-archetype
+name: Brand & Launch
+description: >-
+  A launch manager and brand lead for any app. Give it a brief (product, audience, goal and
+  the metric that proves it, launch window, channels, brand kit) and it writes a campaign
+  plan, researches each channel's current norms with sources and dates, explores the app in
+  a real browser, scripts and records deterministic screen recordings, cuts them into mp4s,
+  GIFs and posters under each platform's hard size limit, renders branded social cards,
+  drafts the copy into a linted queue, and hands you a launch-day run sheet. Every asset
+  waits for your approval in the Campaign Studio gallery. It never posts, never contacts
+  anyone, never invents a number, and keeps secrets, home paths and emails off screen.
+
+# The core version this pin set was last verified against (ADR 0049): metadata, not
+# enforced. See CORE FLOOR above.
+verified_against: 0.188.0
+
+plugins:
+  - { id: campaign,      url: https://github.com/protoLabsAI/campaign-plugin, ref: v0.1.0 }  # Campaign Studio: plans, shot scripts → takes → renders/cards, the approval gallery, campaign_producer
+  - { id: social,        url: https://github.com/protoLabsAI/social-plugin,   ref: v0.4.2 }  # Social Studio: brand kit, researched norms, copy queue, linter, FTC disclosure, export pack
+  - { id: agent_browser, builtin: true }                                                    # explore the target app (real roles/names) before scripting it
+  - { id: artifact,      builtin: true }                                                    # show the plan, contact sheets and the run sheet
+  - { id: notes,         builtin: true }                                                    # ideas and loose ends between sessions
+
+enabled: [campaign, social, agent_browser, artifact, notes]   # suggested turn-on list
+
+# Create-time setup prompts (#2934, core >= 0.144.0). `help` renders on core >= 0.183.0.
+config_inputs:
+  - key: agent_browser.home_url
+    label: "App to launch (URL)"
+    help: "Optional. The Browser panel opens here, and it's where the agent explores and records. You can also name it in the brief."
+    type: string
+
+# No `config:` defaults on purpose. Every member's own defaults are right for a fresh agent:
+#   * Social Studio keeps its brand kit, queue and exports under its per-instance data dir,
+#     and Campaign Studio auto-detects that same brand kit for card colours, fonts and logo.
+#     Point `social.data_dir` at a synced or versioned folder in Settings if you want the
+#     kit in git.
+#   * agent_browser runs headless. The persona uses it to LOOK (open, snapshot, screenshot,
+#     read text), never to sign in to third-party accounts or submit forms.
+#   * The brief, the brand kit and the channels are better answered in the interview than
+#     guessed here.
+
+# Agent archetype (ADR 0042 / 0100): presents this bundle as the "Brand & Launch" agent
+# type in the new-agent picker once installed. `soul_preset` gives a DIRECT
+# `plugin install <url>` the persona on a host whose core ships the preset.
+archetype:
+  label: Brand & Launch
+  icon: Rocket
+  soul_preset: brand-launch
+  blurb: A launch manager for any app — turns a brief into a campaign plan, shoots scripted screen recordings, GIFs and social cards, drafts the copy, and tracks every asset to your approval. Never posts on its own.
+  # Capability contract (#2277, ADR 0100): the persona commits to planning, producing to
+  # ready_for_review, drafting copy into the queue, and exploring the app. Each tool is
+  # registered by a member with the config above; verify_bundle.py fails if one isn't.
+  requires_tools: [campaign_create, campaign_asset_update, social_queue_add, browser_open]
