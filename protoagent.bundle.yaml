@@ -62,7 +62,7 @@ description: >-
 verified_against: 0.188.0
 
 plugins:
-  - { id: campaign,      url: https://github.com/protoLabsAI/campaign-plugin, ref: v0.2.0 }  # Campaign Studio: plans, shot scripts → takes → renders/cards, the approval gallery, campaign_producer
+  - { id: campaign,      url: https://github.com/protoLabsAI/campaign-plugin, ref: v0.3.4 }  # Campaign Studio: plans, shot scripts → takes → renders/cards, the approval gallery, campaign_producer
   - { id: social,        url: https://github.com/protoLabsAI/social-plugin,   ref: v0.5.0 }  # Social Studio: brand kit, researched norms, copy queue, linter, FTC disclosure, export pack
   - { id: agent_browser, builtin: true }                                                    # explore the target app (real roles/names) before scripting it
   - { id: artifact,      builtin: true }                                                    # show the plan, contact sheets and the run sheet
