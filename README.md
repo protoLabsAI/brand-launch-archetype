@@ -51,7 +51,7 @@ These are written into the persona (protoAgent's `config/soul-presets/brand-laun
 
 | plugin | source | role |
 |---|---|---|
-| `campaign` | [campaign-plugin](https://github.com/protoLabsAI/campaign-plugin) (Campaign Studio) | Plans and production: 17 `campaign_*` tools, the `campaign_producer` background subagent, the skills `campaign-planning`, `shot-scripting` and `asset-review`, and the **Campaign Studio** gallery view with the operator-only Approve and Reject buttons |
+| `campaign` | [campaign-plugin](https://github.com/protoLabsAI/campaign-plugin) (Campaign Studio) | Plans and production: 21 `campaign_*` tools, the `campaign_producer` background subagent, the skills `campaign-planning`, `shot-scripting`, `montage-editing` and `asset-review`, and the **Campaign Studio** gallery view with the operator-only Approve and Reject buttons |
 | `social` | [social-plugin](https://github.com/protoLabsAI/social-plugin) (Social Studio) | Copy: the brand kit, researched and dated platform norms, the content queue, the linter, FTC disclosure checks, the export pack, a writer, editor and researcher crew, and the **Social Studio** board view |
 | `agent_browser` | builtin (protoAgent ≥ 0.165.0) | Explores the target app before scripting. Used to look only: it never signs in to third-party accounts or submits forms |
 | `artifact` | builtin | Shows the plan, contact sheets and the run sheet |
