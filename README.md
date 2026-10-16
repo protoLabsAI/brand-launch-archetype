@@ -17,6 +17,7 @@ holds no platform credentials. You approve every asset, and you publish.
 | **Plan** | A Campaign Studio plan: goal math, 2–4 lanes (one angle per audience), a shot list that says who records what, dated milestones, a channel plan, a do-not list, and your decisions with its recommendation for each | Status tables and the plan document, then a numbered list of decisions |
 | **Research** | Each channel's current norms and how the launch surface ranks, from primary sources, each recorded with links and a date | Sourced assumptions in the plan |
 | **Explore & script** | Opens your app in a real browser, snapshots it, and writes shot scripts against the real accessible roles and names | — |
+| **Architecture walkthrough** *(when the launch needs one)* | Maps the target repo's architecture in Atlas (or reuses the model already in its `architecture/` folder, asking before writing there), authors a captioned tour, validates it until clean, and shows you the tour script for approval. Then `atlas_record_script` turns it into a Campaign shot script, recorded as one continuous take | The **Atlas** view, the tour script, then the take in the gallery |
 | **Shoot, render, self-review** | Deterministic Playwright takes, then ffmpeg cuts to mp4, GIF and poster under each platform's **hard** size limit, plus branded cards. Each asset is checked: legible at half size, nothing private on screen, under its limit, starts on the action, loops cleanly | The **Campaign Studio** gallery, every asset at `ready_for_review` |
 | **Copy** | Posts drafted into the Social Studio queue, native to each channel, tied to their asset, linted, with FTC disclosure where someone with a stake posts | The **Social Studio** board, ready to approve |
 | **Run sheet** | A time-ordered launch-day sheet in your timezone: pre-flight checks, each post (channel, time, approved file, approved copy), who does what, what to watch, a day-after check. It uses approved assets and copy only | An artifact, plus the copy-ready export pack |
@@ -53,6 +54,7 @@ These are written into the persona (protoAgent's `config/soul-presets/brand-laun
 |---|---|---|
 | `campaign` | [campaign-plugin](https://github.com/protoLabsAI/campaign-plugin) (Campaign Studio) | Plans and production: 21 `campaign_*` tools, the `campaign_producer` background subagent, the skills `campaign-planning`, `shot-scripting`, `montage-editing` and `asset-review`, and the **Campaign Studio** gallery view with the operator-only Approve and Reject buttons |
 | `social` | [social-plugin](https://github.com/protoLabsAI/social-plugin) (Social Studio) | Copy: the brand kit, researched and dated platform norms, the content queue, the linter, FTC disclosure checks, the export pack, a writer, editor and researcher crew, and the **Social Studio** board view |
+| `atlas` | [atlas-plugin](https://github.com/protoLabsAI/atlas-plugin) (Atlas) | Architecture walkthroughs: renders the target repo's [LikeC4](https://likec4.dev) model (`<repo>/architecture/`) as drill-down views with guided tours, the tools `atlas_validate`, `atlas_describe`, `atlas_show`, `atlas_clear` and `atlas_record_script`, the `atlas` authoring skill, and the **Atlas** view. Needs **Node.js ≥ 20** (see First run) |
 | `agent_browser` | builtin (protoAgent ≥ 0.165.0) | Explores the target app before scripting. Used to look only: it never signs in to third-party accounts or submits forms |
 | `artifact` | builtin | Shows the plan, contact sheets and the run sheet |
 | `notes` | builtin | Ideas and loose ends between sessions |
@@ -67,8 +69,9 @@ post. Export the pack (or CSV) into whatever scheduler you already use.
 ## Create an agent
 
 **Core floor: protoAgent ≥ 0.188.0** on the hub. Campaign Studio declares
-`min_protoagent_version: 0.188.0`, and the loader refuses it on older cores. Bundles can't
-enforce a floor themselves, so it's stated here.
+`min_protoagent_version: 0.188.0`, and the loader refuses it on older cores. (Atlas declares
+0.182.0, so Campaign's floor is the one that binds.) Bundles can't enforce a floor
+themselves, so it's stated here.
 
 ### From the picker (once the archetype is listed)
 
@@ -123,7 +126,7 @@ protoagent fleet up
 python -m server plugin install https://github.com/protoLabsAI/brand-launch-archetype
 ```
 
-Then enable the suggested list (`campaign, social, agent_browser, artifact, notes`).
+Then enable the suggested list (`campaign, social, atlas, agent_browser, artifact, notes`).
 
 ## First run
 
@@ -138,9 +141,44 @@ Then enable the suggested list (`campaign, social, agent_browser, artifact, note
    - **ffmpeg** on PATH: `brew install ffmpeg`, `sudo apt install ffmpeg`, or
      `winget install Gyan.FFmpeg`. Or set Settings ▸ Plugins ▸ Campaign Studio ▸ *ffmpeg path*.
    - agent_browser's banner: **Download agent-browser**, then **Install Chrome**.
+   - **Atlas** (architecture walkthroughs only) needs **Node.js ≥ 20** for its layout engine.
+     It uses Settings ▸ Plugins ▸ Atlas ▸ *Node.js path* if set, then `node` on PATH, then
+     protoAgent's managed Node runtime. Without one, Atlas's setup banner offers
+     **Install Node runtime** (one click) and clears itself once a Node is found. A macOS app
+     launched from the Dock and the Docker image usually have no `node` on PATH; the managed
+     runtime covers both.
 2. Say **"We're launching <product> at <url>. Plan the campaign."** It starts with the brief
    interview. If there's no brand kit, building it comes first (Social Studio's
    `brand-kit-setup`), because every draft and every card depends on it.
+
+## Architecture walkthrough videos (Atlas)
+
+Developer launches often need a "how it works" clip. Atlas makes that a recording of the
+real architecture rather than a slide deck:
+
+1. **Model.** The agent reuses the target repo's `architecture/` LikeC4 model if it has one.
+   If not, it proposes mapping it and **asks before writing into your repo**. It runs
+   `atlas_validate` until the engine and the lint are clean.
+2. **Tour.** It writes a tour in `atlas.tours.json` (or uses the flow you already have),
+   with a one-sentence note on every step. In record mode those notes become large on-screen
+   captions, and each slide holds for its note's reading time. You approve the tour script
+   before anything is recorded.
+3. **Record.** `atlas_record_script(tour)` returns a Campaign Studio shot script (YAML) and
+   the expected length. The script opens the console, clicks **Atlas**, collapses the docks so
+   Atlas fills the frame, starts *Record — ‹tour›*, and marks one continuous take. The agent
+   hands it to Campaign's shot-script flow unchanged.
+4. **Review.** It checks the take before you see it: a frame sheet including 100% crops of
+   the smallest text (Atlas's sizes are tuned for crisp 2K frames), the Atlas view on camera
+   the whole time, and the final caption readable for at least 4 s before the end.
+
+The take is continuous footage, never jump-cut (speed ramps only). Coming in Campaign Studio,
+not depended on yet: 2K device-scale capture (campaign-plugin#16) and a reusable brand outro
+(beat → boot-splash bumper → Star-on-GitHub CTA, #17). The goal is finished videos straight
+from a chat, A2A or `/v1` request ([campaign-plugin#18](https://github.com/protoLabsAI/campaign-plugin/issues/18)).
+
+The persona half of this flow ships in protoAgent's `brand-launch` soul preset. On a core
+whose preset predates it, the agent still has the Atlas tools and skill, but you'll need to
+ask for the walkthrough explicitly.
 
 ## Reuse it for any app
 
@@ -154,6 +192,12 @@ lives in data the agent builds with you:
   brand: `campaign_list` shows them all.
 - **Shot scripts**: stored per campaign. Re-shoot after a UI change with the same script and
   you get the same take.
+
+- **The architecture model** (Atlas): a folder of LikeC4 `.c4` files plus
+  `atlas.tours.json` in the *target* repo's `architecture/` (Atlas's `model_dir` default).
+  It belongs to that repo, not to the agent: if one exists the agent reuses it, and it asks
+  you before writing one. Once it's there, a re-record after an architecture change is a
+  tour edit and one more take.
 
 For a second, unrelated brand, create a second member from the archetype so the kits and
 queues stay separate.
