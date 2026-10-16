@@ -171,10 +171,13 @@ real architecture rather than a slide deck:
    the smallest text (Atlas's sizes are tuned for crisp 2K frames), the Atlas view on camera
    the whole time, and the final caption readable for at least 4 s before the end.
 
-The take is continuous footage, never jump-cut (speed ramps only). Coming in Campaign Studio,
-not depended on yet: 2K device-scale capture (campaign-plugin#16) and a reusable brand outro
-(beat → boot-splash bumper → Star-on-GitHub CTA, #17). The goal is finished videos straight
-from a chat, A2A or `/v1` request ([campaign-plugin#18](https://github.com/protoLabsAI/campaign-plugin/issues/18)).
+The take is continuous footage, never jump-cut (speed ramps only). With Campaign Studio
+v0.4.0 (pinned here) the agent can also produce the finished video in one step,
+`campaign_produce_video`: 2K device-scale capture, the brand intro (boot-splash bumper → title
+card) and outro (final-caption beat → bumper → Star-on-GitHub card), the signature **Edge
+Sweep** and **Boot Seam** transitions, and automatic quality gates before delivery. The video
+arrives in chat as a file, and A2A or `/v1` callers get a link
+([campaign-plugin#18](https://github.com/protoLabsAI/campaign-plugin/issues/18) tracks the rest).
 
 The persona half of this flow ships in protoAgent's `brand-launch` soul preset. On a core
 whose preset predates it, the agent still has the Atlas tools and skill, but you'll need to
