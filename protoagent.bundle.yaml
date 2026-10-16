@@ -16,6 +16,8 @@
 # and in the README, not enforced by the bundle):
 #   * campaign-plugin declares `min_protoagent_version: 0.188.0`, and the loader REFUSES
 #     it on an older core, so the planning and production half would be missing;
+#   * atlas-plugin declares `min_protoagent_version: 0.182.0` (the code-pane bridge) —
+#     below campaign's, so campaign's 0.188.0 is the floor that binds;
 #   * `agent_browser` is a core builtin from 0.165.0 (#3451);
 #   * the `brand-launch` soul preset ships with the protoAgent PR that added this
 #     archetype's catalog row. On a core without it, a picker/`soul_preset` create falls
@@ -36,6 +38,10 @@
 #     Gyan.FFmpeg`) or Settings ▸ Plugins ▸ Campaign Studio ▸ ffmpeg path;
 #   * agent_browser's banner: "Download agent-browser" and "Install Chrome" (for exploring
 #     the target app before scripting it).
+#   * Atlas (architecture walkthroughs only): Node.js >= 20 — `node` on PATH, Settings ▸
+#     Plugins ▸ Atlas ▸ Node.js path, or the managed Node runtime from Atlas's setup banner
+#     ("Install Node runtime", one click). A Dock-launched macOS app and the Docker image
+#     usually have no `node` on PATH; the managed runtime covers both.
 #
 # MODEL — deliberately unset: the agent uses the host's model connection.
 #
@@ -51,14 +57,16 @@ name: Brand & Launch
 # plugin-release.yml (.github/workflows/release.yml); protoAgent's bundle loader ignores it.
 # Bump it in the PR that ships the release, then merge as `chore: release vX.Y.Z` (or
 # run the Release workflow by hand).
-version: 0.2.0
+version: 0.3.0
 description: >-
   A launch manager and brand lead for any app. Give it a brief (product, audience, goal and
   the metric that proves it, launch window, channels, brand kit) and it writes a campaign
   plan, researches each channel's current norms with sources and dates, explores the app in
   a real browser, scripts and records deterministic screen recordings, cuts them into mp4s,
   GIFs and posters under each platform's hard size limit, renders branded social cards,
-  drafts the copy into a linted queue, and hands you a launch-day run sheet. Every asset
+  drafts the copy into a linted queue, and hands you a launch-day run sheet. When a launch
+  needs an architecture walkthrough, it maps (or reuses) the target repo's LikeC4 model in
+  Atlas, scripts a captioned tour, and records it as one continuous take. Every asset
   waits for your approval in the Campaign Studio gallery. It never posts, never contacts
   anyone, never invents a number, and keeps secrets, home paths and emails off screen.
 
@@ -69,11 +77,12 @@ verified_against: 0.200.0
 plugins:
   - { id: campaign,      url: https://github.com/protoLabsAI/campaign-plugin, ref: v0.3.5 }  # Campaign Studio: plans, shot scripts → takes → renders/cards/montages, the approval gallery, campaign_producer
   - { id: social,        url: https://github.com/protoLabsAI/social-plugin,   ref: v0.5.0 }  # Social Studio: brand kit, researched norms, copy queue, linter, FTC disclosure, export pack
+  - { id: atlas,         url: https://github.com/protoLabsAI/atlas-plugin,    ref: v0.2.0 }  # Atlas: the target repo's architecture as drill-down LikeC4 views; atlas_record_script → a Campaign shot script for a walkthrough video
   - { id: agent_browser, builtin: true }                                                    # explore the target app (real roles/names) before scripting it
   - { id: artifact,      builtin: true }                                                    # show the plan, contact sheets and the run sheet
   - { id: notes,         builtin: true }                                                    # ideas and loose ends between sessions
 
-enabled: [campaign, social, agent_browser, artifact, notes]   # suggested turn-on list
+enabled: [campaign, social, atlas, agent_browser, artifact, notes]   # suggested turn-on list
 
 # Create-time setup prompts (#2934, core >= 0.144.0). `help` renders on core >= 0.183.0.
 config_inputs:
@@ -91,6 +100,11 @@ config_inputs:
 #     read text), never to sign in to third-party accounts or submit forms.
 #   * The brief, the brand kit and the channels are better answered in the interview than
 #     guessed here.
+#   * Atlas's defaults are the recommended values: `model_dir: architecture` (the model
+#     lives in the TARGET repo's architecture/ folder; the persona asks before writing
+#     there) and `transition_speed: normal` (the pace its record-mode timing model and
+#     2K legibility checks were tuned at). `project` stays blank: it follows the
+#     console's filesystem project.
 
 # Agent archetype (ADR 0042 / 0100): presents this bundle as the "Brand & Launch" agent
 # type in the new-agent picker once installed. `soul_preset` gives a DIRECT
